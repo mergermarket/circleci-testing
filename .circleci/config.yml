@@ -1,40 +1,64 @@
 version: 2
 jobs:
-  one:
+  test:
     docker:
       - image: circleci/ruby:2.4.1
     steps:
       - checkout
-      - run: echo "A first hello"
-      - run: mkdir -p my_workspace
-      - run: echo "Trying out workspaces" > my_workspace/echo-output
-      - persist_to_workspace:
-          # Must be an absolute path, or relative path from working_directory
-          root: my_workspace
-          # Must be relative path from root
-          paths:
-            - echo-output
-  two:
+      - run: echo "completed the 'test' stage"
+  release:
     docker:
       - image: circleci/ruby:2.4.1
     steps:
       - checkout
-      - run: echo "Another hello"
-      - attach_workspace:
-          # Must be absolute path or relative path from working_directory
-          at: my_workspace
-
-      - run: |
-          if [[ $(cat my_workspace/echo-output) == "Trying out workspaces" ]]; then
-            echo "It worked!";
-          else
-            echo "Nope!"; exit 1
-          fi
+      - run: echo "completed the 'release' stage"
+  deploy_to_aslive:
+    docker:
+      - image: circleci/ruby:2.4.1
+    steps:
+      - checkout
+      - run: echo "completed the 'deploy_to_aslive' stage"
+  smoke_test_aslive:
+    docker:
+      - image: circleci/ruby:2.4.1
+    steps:
+      - checkout
+      - run: echo "completed the 'smoke_test_aslive' stage"
+  deploy_to_live:
+    docker:
+      - image: circleci/ruby:2.4.1
+    steps:
+      - checkout
+      - run: echo "completed the 'deploy_to_live' stage"
+  smoke_test_live:
+    docker:
+      - image: circleci/ruby:2.4.1
+    steps:
+      - checkout
+      - run: echo "completed the 'smoke_test_live' stage"
 workflows:
   version: 2
-  one_and_two:
+  build-test-and-approval-deploy:
     jobs:
-      - one
-      - two:
+      - test  # custom job that builds the code
+      - release: # custom job; runs release suite
+          requires: # release will not run until the `test` job is completed.
+            - test
+      - deploy_to_aslive: # another custom job; runs deploy_to_aslive suite,
+          requires: # deploy_to_aslive is dependent on the success of job `release`
+            - release
+      - smoke_test_aslive:
           requires:
-            - one
+            - deploy_to_aslive
+      - hold: # <<< A job that will require manual approval in the CircleCI web application.
+          type: approval # <<< This key-value pair will set your workflow to a status of "On Hold"
+          requires: # We only run the "hold" job when deploy_to_aslive has succeeded
+           - smoke_test_aslive
+      # On approval of the `hold` job, any successive job that requires the `hold` job will run.
+      # In this case, a user is manually triggering the deploy job.
+      - deploy_to_live:
+          requires:
+            - hold
+      - smoke_test_live:
+          requires:
+            - deploy_to_live
