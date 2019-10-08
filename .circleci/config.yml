@@ -49,28 +49,32 @@ workflows:
       - test  # custom job that builds the code
           filters:
             branches:
-              only: master
+              only:
+                - master
 
       - release: # custom job; runs release suite
           requires: # release will not run until the `test` job is completed.
             - test
           filters:
             branches:
-              only: master
+              only:
+                - master
 
       - deploy_to_aslive: # another custom job; runs deploy_to_aslive suite,
           requires: # deploy_to_aslive is dependent on the success of job `release`
             - release
           filters:
             branches:
-              only: master
+              only:
+                - master
 
       - smoke_test_aslive:
           requires:
             - deploy_to_aslive
           filters:
             branches:
-              only: master
+              only:
+                - master
 
       - hold: # <<< A job that will require manual approval in the CircleCI web application.
           type: approval # <<< This key-value pair will set your workflow to a status of "On Hold"
@@ -84,11 +88,13 @@ workflows:
             - hold
           filters:
             branches:
-              only: master
+              only:
+                - master
 
       - smoke_test_live:
           requires:
             - deploy_to_live
           filters:
             branches:
-              only: master
+              only:
+                - master
