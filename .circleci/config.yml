@@ -16,7 +16,7 @@ jobs:
       - save_cache:
           paths:
             - ~/.local/share/virtualenvs/venv  # this path depends on where pipenv creates a virtualenv
-      key: pip-packages-v1-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+          key: pip-packages-v1-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
       # - run:
       #     name: Run Help
       #     command: cdflow --help
