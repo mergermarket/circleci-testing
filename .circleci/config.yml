@@ -1,10 +1,17 @@
 version: 2
+
 jobs:
   test:
-    docker:
-      - image: circleci/ruby:2.4.1
+    machine:
+      image: circleci/classic:201808-01
     steps:
+      - run:
+          name: Get cdflow
+          command: pip install cdflow
       - checkout
+      - run:
+          name: Run Help
+          command: cdflow --help
       - run: echo "completed the 'test' stage"
 
   release:
@@ -47,7 +54,7 @@ workflows:
   build-test-and-approval-deploy:
     jobs:
       - test:  # custom job that builds the code
-          filters:
+          filters:  # only the specified branche(s) will trigger the build
             branches:
               only:
                 - master
