@@ -19,36 +19,31 @@ jobs:
       - run: echo "completed the 'test' stage"
 
   release:
-    docker:
-      - image: circleci/ruby:2.4.1
+    executor: quick-exec
     steps:
       - checkout
       - run: echo "completed the 'release' stage"
 
   deploy_to_aslive:
-    docker:
-      - image: circleci/ruby:2.4.1
+    executor: quick-exec
     steps:
       - checkout
       - run: echo "completed the 'deploy_to_aslive' stage"
 
   smoke_test_aslive:
-    docker:
-      - image: circleci/ruby:2.4.1
+    executor: quick-exec
     steps:
       - checkout
       - run: echo "completed the 'smoke_test_aslive' stage"
 
   deploy_to_live:
-    docker:
-      - image: circleci/ruby:2.4.1
+    executor: quick-exec
     steps:
       - checkout
       - run: echo "completed the 'deploy_to_live' stage"
 
   smoke_test_live:
-    docker:
-      - image: circleci/ruby:2.4.1
+    executor: quick-exec
     steps:
       - checkout
       - run: echo "completed the 'smoke_test_live' stage"
@@ -71,26 +66,27 @@ workflows:
               only:
                 - master
 
-      - deploy_to_aslive: # another custom job; runs deploy_to_aslive suite,
-          requires: # deploy_to_aslive is dependent on the success of job `release`
-            - release
-          filters:
-            branches:
-              only:
-                - master
-
-      - smoke_test_aslive:
-          requires:
-            - deploy_to_aslive
-          filters:
-            branches:
-              only:
-                - master
+      # - deploy_to_aslive: # another custom job; runs deploy_to_aslive suite,
+      #     requires: # deploy_to_aslive is dependent on the success of job `release`
+      #       - release
+      #     filters:
+      #       branches:
+      #         only:
+      #           - master
+      #
+      # - smoke_test_aslive:
+      #     requires:
+      #       - deploy_to_aslive
+      #     filters:
+      #       branches:
+      #         only:
+      #           - master
 
       - hold: # <<< A job that will require manual approval in the CircleCI web application.
           type: approval # <<< This key-value pair will set your workflow to a status of "On Hold"
           requires: # We only run the "hold" job when deploy_to_aslive has succeeded
-           - smoke_test_aslive
+           - release
+           # - smoke_test_aslive
 
       # On approval of the `hold` job, any successive job that requires the `hold` job will run.
       # In this case, a user is manually triggering the deploy job.
@@ -102,10 +98,10 @@ workflows:
               only:
                 - master
 
-      - smoke_test_live:
-          requires:
-            - deploy_to_live
-          filters:
-            branches:
-              only:
-                - master
+      # - smoke_test_live:
+      #     requires:
+      #       - deploy_to_live
+      #     filters:
+      #       branches:
+      #         only:
+      #           - master
