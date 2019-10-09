@@ -5,22 +5,54 @@ executors:
     machine:
       image: circleci/classic:201808-01
 
+# commands:
+#   dependencies-cache:
+#     steps:
+#       - run: # the chown command to grants CircleCI access to dependency locations.
+#           name: "Fix ownership of directories with Python packages"
+#           command: |
+#             sudo chown -R circleci:circleci /usr/local/bin
+#             sudo chown -R circleci:circleci /usr/local/lib/python3.6/site-packages
+#       - restore_cache: # ensure this step occurs *before* installing dependencies
+#           key: 'pip-packages-v1-{{ .Branch }}-{{ checksum "Pipfile.lock" }}'
+#       - run:
+#           name: "Installing dependencies"
+#           command: | # use pipenv to install dependencies
+#             sudo pip install pipenv
+#             pipenv install
+#       - save_cache:
+#           key: 'pip-packages-v1-{{ .Branch }}-{{ checksum "Pipfile.lock" }}'
+#           paths:
+#             - ".venv"
+#             - "/usr/local/bin"
+#             - "/usr/local/lib/python3.6/site-packages"
+
 jobs:
   test:
     executor: quick-exec
     steps:
       - checkout
+      - run: # the chown command to grants CircleCI access to dependency locations.
+          name: "Fix ownership of directories with Python packages"
+          command: |
+            sudo chown -R circleci:circleci /usr/local/bin
+            sudo chown -R circleci:circleci /usr/local/lib/python3.6/site-packages
+      - restore_cache: # ensure this step occurs *before* installing dependencies
+          key: 'pip-packages-v1-{{ .Branch }}-{{ checksum "Pipfile.lock" }}'
       - run:
-          command: |  # use pipenv to install dependencies
+          name: "Install pipenv"
+          command: | # use pipenv to install dependencies
             sudo pip install pipenv
             pipenv install
       - run:
           name: Install cdflow
           command: pipenv install cdflow
       - save_cache:
+          key: 'pip-packages-v1-{{ .Branch }}-{{ checksum "Pipfile.lock" }}'
           paths:
-            - ~/.local/share/virtualenvs/venv  # this path depends on where pipenv creates a virtualenv
-          key: pip-packages-v1-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+            - ".venv"
+            - "/usr/local/bin"
+            - "/usr/local/lib/python3.6/site-packages"
       # - run:
       #     name: Run Help
       #     command: cdflow --help
