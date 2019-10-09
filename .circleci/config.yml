@@ -10,18 +10,21 @@ jobs:
     executor: quick-exec
     steps:
       - run:
-          name: Get cdflow
+          name: Install cdflow
           command: pip install cdflow
       - checkout
-      - run:
-          name: Run Help
-          command: cdflow --help
+      # - run:
+      #     name: Run Help
+      #     command: cdflow --help
       - run: echo "completed the 'test' stage"
 
   release:
     executor: quick-exec
     steps:
       - checkout
+      - run: # get this to work
+          name: Run Help
+          command: cdflow --help
       - run: echo "completed the 'release' stage"
 
   deploy_to_aslive:
