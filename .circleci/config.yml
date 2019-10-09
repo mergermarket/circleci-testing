@@ -13,6 +13,10 @@ jobs:
           name: Install cdflow
           command: pip install cdflow
       - checkout
+  - save_cache:
+      paths:
+        - ~/.local/share/virtualenvs/venv  # this path depends on where pipenv creates a virtualenv
+      key: pip-packages-v1-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
       # - run:
       #     name: Run Help
       #     command: cdflow --help
@@ -22,6 +26,12 @@ jobs:
     executor: quick-exec
     steps:
       - checkout
+  - restore_cache:
+      keys:
+        # when lock file changes, use increasingly general patterns to restore cache
+        - pip-packages-v1-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+        - pip-packages-v1-{{ .Branch }}-
+        - pip-packages-v1-
       - run: # get this to work
           name: Run Help
           command: cdflow --help
