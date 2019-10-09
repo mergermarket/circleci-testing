@@ -1,9 +1,13 @@
 version: 2
 
-jobs:
-  test:
+executors:
+  quick-exec:
     machine:
       image: circleci/classic:201808-01
+
+jobs:
+  test:
+    executor: quick-exec
     steps:
       - run:
           name: Get cdflow
