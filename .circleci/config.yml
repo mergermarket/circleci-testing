@@ -9,10 +9,14 @@ jobs:
   test:
     executor: quick-exec
     steps:
+      - checkout
+      - run:
+          command: |  # use pipenv to install dependencies
+            sudo pip install pipenv
+            pipenv install
       - run:
           name: Install cdflow
-          command: pip install cdflow
-      - checkout
+          command: pipenv install cdflow
       - save_cache:
           paths:
             - ~/.local/share/virtualenvs/venv  # this path depends on where pipenv creates a virtualenv
