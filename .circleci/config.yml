@@ -16,16 +16,16 @@ commands:
       - restore_cache: # ensure this step occurs *before* installing dependencies
           keys:
             # when lock file changes, use increasingly general patterns to restore cache
-            - pip-packages-v1-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
-            - pip-packages-v1-{{ .Branch }}-
-            # - pip-packages-v1-
+            - pip-packages-v1-1-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+            - pip-packages-v1-1-{{ .Branch }}-
+            # - pip-packages-v1-1-
       - run:
           name: "Installing dependencies"
           command: | # use pipenv to install dependencies
             sudo pip install pipenv
             pipenv install cdflow
       - save_cache:
-          key: 'pip-packages-v1-{{ .Branch }}-{{ checksum "Pipfile.lock" }}'
+          key: 'pip-packages-v1-1-{{ .Branch }}-{{ checksum "Pipfile.lock" }}'
           paths:
             - ".venv"
             - "/usr/local/bin"
@@ -39,7 +39,7 @@ jobs:
       - dependencies-cache
       - run:
           name: Run Help
-          command: cdflow --help
+          command: pipenv run cdflow --help
       - run: echo "completed the 'test' stage"
 
   release:
