@@ -86,6 +86,7 @@ workflows:
                 - master
 
       - release: # custom job; runs release suite
+          context: DevTeam-Platform
           requires: # release will not run until the `test` job is completed.
             - test
           filters:
