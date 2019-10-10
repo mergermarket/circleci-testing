@@ -38,7 +38,7 @@ jobs:
       - run:
           name: Run Help
           command: cdflow --help
-      - run: echo "completed the 'test' stage"
+      # - run: echo "completed the 'test' stage"
 
   release:
     executor: quick-exec
@@ -46,9 +46,10 @@ jobs:
       - checkout
       - dependencies-cache
       - run: # get this to work
-          name: Run Help
-          command: cdflow --help
-      - run: echo "completed the 'release' stage"
+          name: Run Release
+          command: |
+            cdflow release --platform-config ./platform-config 1-marcus -v
+      # - run: echo "completed the 'release' stage"
 
   deploy_to_aslive:
     executor: quick-exec
