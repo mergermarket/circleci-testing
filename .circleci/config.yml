@@ -8,28 +8,26 @@ executors:
 commands:
   dependencies-cache:
     steps:
-      - run: # the chown command to grants CircleCI access to dependency locations.
-          name: "Fix ownership of directories with Python packages"
-          command: |
-            sudo chown -R circleci:circleci /usr/local/bin
-      #       sudo chown -R circleci:circleci /usr/local/lib/python3.6/site-packages
       - restore_cache: # ensure this step occurs *before* installing dependencies
           keys:
             # when lock file changes, use increasingly general patterns to restore cache
-            - pip-packages-v1-1-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
-            - pip-packages-v1-1-{{ .Branch }}-
-            # - pip-packages-v1-1-
+            - pip-packages-v1-2-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+            - pip-packages-v1-2-{{ .Branch }}-
+            - pip-packages-v1-2-
       - run:
-          name: "Installing dependencies"
-          command: | # use pipenv to install dependencies
-            sudo pip install pipenv
-            pipenv install cdflow
+          name: Installing cdflow
+          command: | # set python version and install dependencies
+            pyenv global 3.5.2
+            pip3 install cdflow
+      - run:
+          name: Get Platform Config
+          command: |
+            git clone https://github.com/mergermarket/test-platform-config.git platform-config
       - save_cache:
-          key: 'pip-packages-v1-1-{{ .Branch }}-{{ checksum "Pipfile.lock" }}'
+          key: pip-packages-v1-2-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
           paths:
-            - ".venv"
-            - "/usr/local/bin"
-            # - "/usr/local/lib/python3.6/site-packages"
+            - /opt/circleci/.pyenv/versions/3.5.2/
+            - /opt/circleci/.pyenv/shims/cdflow
 
 jobs:
   test:
@@ -39,7 +37,7 @@ jobs:
       - dependencies-cache
       - run:
           name: Run Help
-          command: pipenv run cdflow --help
+          command: cdflow --help
       - run: echo "completed the 'test' stage"
 
   release:
